@@ -1,4 +1,5 @@
-//use std::env;
+use std::env;
+use std::io;
 //use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -41,14 +42,49 @@ impl GPTRequest {
     }
 }
 
-fn main() {
+fn wait_for_api_ywt() -> String {
+    let args: Vec<String> = env::args().collect();
+    let api_ywt: String = if args.len() > 1 {
+        args[1].to_string()
+    } else {
+        println!("Please enter your OpenAI API key (do not share your API key with others, or expose it in the browser or other client-side code): ");
+        let mut user_input = String::new();
+        io::stdin().read_line(&mut user_input).unwrap();
+        user_input.trim().to_string()
+    };
+
+    api_ywt
+}
+
+fn set_language() -> String {
+    println!("Please type the language you want to learn (for example 'English'): ");
+    let mut user_input = String::new();
+    io::stdin().read_line(&mut user_input).unwrap();
+    user_input.trim().to_string()
+}
+
+fn set_openai_chat(language: &String) -> GPTRequest {
     let mut ai_chat = GPTRequest::new(OPENAI_MODEL.to_string(), OPENAI_TEMPERATURE, OPENAI_MAXTOKENS);
-    ai_chat.add_message(Message{role: "system".to_string(), content: "english teacher1".to_string()});
-    ai_chat.add_message(Message{role: "system".to_string(), content: "english teacher2".to_string()});
-    ai_chat.add_message(Message{role: "system".to_string(), content: "english teacher3".to_string()});
-    ai_chat.add_message(Message{role: "system".to_string(), content: "english teacher4".to_string()});
-    ai_chat.add_message(Message{role: "system".to_string(), content: "english teacher5".to_string()});
-    ai_chat.add_message(Message{role: "system".to_string(), content: "english teacher6".to_string()});
+    let message = format!("You are my lector of {0} language. You will be provided with statements, and your task will be to split the answer in two. First: convert my statements to standard {0} language. Second: keep the conversation going.", language);
+    ai_chat.add_message(Message{role: "system".to_string(), content: message});
+    ai_chat
+}
+
+fn main() {
+    let ywt_api_key = wait_for_api_ywt();
+    let language = set_language();
+    println!("ywt: {}", ywt_api_key);
+    println!("Language: {}", language);
+
+    let mut ai_chat = set_openai_chat(&language);
+    
+    //let mut ai_chat = GPTRequest::new(OPENAI_MODEL.to_string(), OPENAI_TEMPERATURE, OPENAI_MAXTOKENS);
+    ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher1".to_string()});
+    ai_chat.add_message(Message{role: "assistant".to_string(), content: "english teacher2".to_string()});
+    ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher3".to_string()});
+    ai_chat.add_message(Message{role: "assistant".to_string(), content: "english teacher4".to_string()});
+    ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher5".to_string()});
+    ai_chat.add_message(Message{role: "assistant".to_string(), content: "english teacher6".to_string()});
 
     println!("{:#?}", ai_chat);
 }
