@@ -80,9 +80,10 @@ fn wait_for_api_ywt() -> String {
         args[1].to_string()
     } else {
         println!("Please enter your OpenAI API key (do not share your API key with others, or expose it in the browser or other client-side code): ");
-        let mut user_input = String::new();
-        io::stdin().read_line(&mut user_input).unwrap();
-        user_input.trim().to_string()
+        get_user_input()
+        //let mut user_input = String::new();
+        //io::stdin().read_line(&mut user_input).unwrap();
+        //user_input.trim().to_string()
     };
 
     api_ywt
@@ -90,6 +91,13 @@ fn wait_for_api_ywt() -> String {
 
 fn set_language() -> String {
     println!("Please type the language you want to learn (for example 'English'): ");
+    get_user_input()
+    //let mut user_input = String::new();
+    //io::stdin().read_line(&mut user_input).unwrap();
+    //user_input.trim().to_string()
+}
+
+fn get_user_input() -> String {
     let mut user_input = String::new();
     io::stdin().read_line(&mut user_input).unwrap();
     user_input.trim().to_string()
@@ -109,6 +117,8 @@ fn main() {
     println!("Language: {}", language);
 
     let mut ai_chat = set_openai_chat(&language);
+
+    println!("Please start the conversation: ");
     
     //let mut ai_chat = GPTRequest::new(OPENAI_MODEL.to_string(), OPENAI_TEMPERATURE, OPENAI_MAXTOKENS);
     ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher1".to_string()});
