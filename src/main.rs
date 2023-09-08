@@ -24,6 +24,38 @@ struct GPTRequest {
     messages: Vec<Message>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct GPTResponse {
+    id: String,
+    object: String,
+    created: i64,
+    model: String,
+    choices: Vec<Choice>,
+    usage: Usage,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Choice {
+    index: i32,
+    message: Message,
+    finish_reason: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Usage {
+    prompt_tokens: i32,
+    completion_tokens: i32,
+    total_tokens: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct GPTError {
+    messsge: String,
+    err_type: String,
+    param: String,
+    code: String,
+}
+
 impl GPTRequest {
     fn new(model: String, temperature: f32, max_tokens: i32) -> Self {
         GPTRequest {
