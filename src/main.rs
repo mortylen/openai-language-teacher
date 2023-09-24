@@ -1,16 +1,18 @@
 use std::env;
 use std::io;
-use std::collections::HashMap;
+//use std::collections::HashMap;
 //use std::error::Error;
 use serde::{Deserialize, Serialize};
 //use serde_json::{Result, Value, json};
 use reqwest::header::{CONTENT_TYPE, AUTHORIZATION};
 //use reqwest::Client;
-use reqwest::{Client, Error, header};
+//use reqwest::{Client, Error, header};
+use reqwest::{Error, StatusCode};
 
 const MAX_MESSAGE_BUFFER: usize = 10;
 //const OPENAI_MODEL: &'static str = "gpt-4";
 const OPENAI_MODEL: &'static str = "gpt-3.5-turbo";
+const OPENAI_MODEL_URL: &'static str = "https://api.openai.com/v1/chat/completions";
 const OPENAI_TEMPERATURE: f32 = 0.8;
 const OPENAI_MAXTOKENS: i32 = 2048; 
 
@@ -113,7 +115,6 @@ fn set_openai_chat(language: &String) -> GPTRequest {
     //let message = format!("Could you please assist me with something? I have a specific request for our conversation format. I would like you to split each of your replies into two paragraphs. In the first paragraph, I kindly ask you to correct any mistakes in my {0} language. In the second paragraph, feel free to respond to my statement and continue the conversation.", language);
     //let message = format!("You will be provided with statements, and your task will be to split the answer in two. First: convert my statements to standard {0} language. Second: keep the conversation going.", language);
     ai_chat.add_message(Message{role: "system".to_string(), content: message});
-    //ai_chat.add_message(Message{role: "user".to_string(), content: message});
     ai_chat
 }
 
@@ -121,138 +122,156 @@ fn set_openai_chat(language: &String) -> GPTRequest {
 async fn main() -> Result<(), Error> {
     let ywt_api_key = wait_for_api_ywt();
     let language = set_language();
-    println!("ywt: {}", ywt_api_key);
-    println!("Language: {}", language);
-
     let mut ai_chat = set_openai_chat(&language);
-
-    //send_message(&ai_chat, &ywt_api_key).await?;
 
     println!("Please start the conversation: ");
     
-    //let mut ai_chat = GPTRequest::new(OPENAI_MODEL.to_string(), OPENAI_TEMPERATURE, OPENAI_MAXTOKENS);
-    //ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher1".to_string()});
-    //ai_chat.add_message(Message{role: "assistant".to_string(), content: "english teacher2".to_string()});
-    //ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher3".to_string()});
-    //ai_chat.add_message(Message{role: "assistant".to_string(), content: "english teacher4".to_string()});
-    //ai_chat.add_message(Message{role: "user".to_string(), content: "english teacher5".to_string()});
-    //ai_chat.add_message(Message{role: "assistant".to_string(), content: "english teacher6".to_string()});
-
-    //println!("{:#?}", ai_chat);
-    for n in 1..11 {
-    //loop {
-    println!("You: ");
-    //let message: String = get_user_input();
-    let message: String = format!("I would like you to split each of your replies into two paragraphs. In the first paragraph, I kindly ask you to correct any mistakes in my {0} language. In the second paragraph, feel free to respond to my statement and continue the conversation. \n\n '{1}'", language,  get_user_input());
-    ai_chat.add_message(Message{role: "user".to_string(), content: message});
-    //let response_content: String = get_content_from_response(send_message(message));
-    //ai_chat.add_message(Message{role: "assistant".to_string(), content: response_content});
-    //println!("Lector: {}", response_content);
-    //break;
-    //}
-
-    //println!("{:#?}", ai_chat);
-
+    loop {
+        println!("You: ");
+        //let message: String = format!("I would like you to split each of your replies into two paragraphs. In the first paragraph, I kindly ask you to correct any mistakes in my {0} language. In the second paragraph, feel free to respond to my statement and continue the conversation. \n\n '{1}'", language,  get_user_input());
+        //let message: String = format!("I would like you to split each of your replies into two part. In the first part, I kindly ask you to correct any mistakes in my {0} language and describe it. In the second part, feel free to respond to my statement and continue the conversation. \n\n '{1}'", language,  get_user_input());
+        let message: String = format!("I would like you to split each of your replies into two part. In the first part called as 'Correction:', correct and describe any mistakes in my {0} language. In the second part called as 'Conversation:', feel free to respond to my statement and continue the conversation. \n '{1}'", language,  get_user_input());
+        ai_chat.add_message(Message{role: "user".to_string(), content: message});
     
-    //send_message(&ai_chat, &ywt_api_key).await?;
-    match send_message(&ai_chat, &ywt_api_key).await {
-        Ok(response) => {
-            let message_content = Message {
-                role: response.choices[0].message.role.clone(),
-                content: response.choices[0].message.content.clone(),
-            };
-            
-            ai_chat.add_message(message_content);
+        println!("\n");
+        
+        match send_message(&ai_chat, &ywt_api_key).await {
+            Ok(response) => {
+                let message_content = Message {
+                    role: response.choices[0].message.role.clone(),
+                    content: response.choices[0].message.content.clone(),
+                };
+                
+                ai_chat.add_message(message_content);
+                println!("Lector:\n{}", response.choices[0].message.content);
+                //println!("\n");
+            }
+            Err(error) => {
+                eprintln!("Error sending message: {:?}", error);
+            }
         }
-        Err(error) => {
-            // Handle the error case here
-            eprintln!("Error sending message: {:?}", error);
-        }
-    }
-
-    println!("{:#?}", ai_chat);
+    
+        //println!("{:#?}", ai_chat);
     }
     
-    Ok(())
-
-    //if let Err(err) = send_message(&ai_chat, &ywt_api_key).await {
-    //    eprintln!("Error: {}", err);
-    //}
-}
-
-async fn send_message(request: &GPTRequest, ywt_api_key: &String) -> Result<GPTResponse, Error>  {
-    let url = "https://api.openai.com/v1/chat/completions"; // "https://httpbin.org/post";
-    //let json_data = r#"{"name": "John Doe", "email": "john.doe@example.com"}"#;
-
-    let client = reqwest::Client::new();
-
-    let response = client
-        .post(url)
-        .header(CONTENT_TYPE, "application/json")
-        .header(AUTHORIZATION, format!("Bearer {}", ywt_api_key.trim()))
-        //.body(json_data.to_owned())
-        .json(&request)
-        .send()
-        .await?;
-
-    //TODO: Check status
-    println!("Status: {}", response.status());
-
-    let response_body = response.text().await?;
-    println!("Response body:\n{}", response_body);
-
-    //let xxx: GPTResponse = serde_json::from_str(&response_body);
-
-    let parse_result: Result<GPTResponse, _> = serde_json::from_str(&response_body);
-    match parse_result {
-        Ok(parsed_data) => {
-            println!("Parsed data: {:#?}", parsed_data);
-            println!("MESSAGE: {:#?}", parsed_data.choices[0].message);
-            Ok(parsed_data)
-        },
-        Err(error) => {
-            println!("Error parsing JSON: {:#?}", error);
-            let empty_response: GPTResponse = Default::default();
-            Ok(empty_response)
-         },
-     }
-
     //Ok(())
 }
 
-// async fn send_message(request: &GPTRequest, ywt_api_key: &String) -> Result<(), Error>  {
-//     let url = "https://api.openai.com/v1/chat/completions"; // "https://httpbin.org/post";
-//     //let json_data = r#"{"name": "John Doe", "email": "john.doe@example.com"}"#;
-
+// async fn send_message_X(request: &GPTRequest, ywt_api_key: &String) -> Result<GPTResponse, Error>  {
+//     //let url = "https://api.openai.com/v1/chat/completions"; // "https://httpbin.org/post";
 //     let client = reqwest::Client::new();
 
 //     let response = client
-//         .post(url)
+//         .post(OPENAI_MODEL_URL)
 //         .header(CONTENT_TYPE, "application/json")
 //         .header(AUTHORIZATION, format!("Bearer {}", ywt_api_key.trim()))
-//         //.body(json_data.to_owned())
 //         .json(&request)
 //         .send()
 //         .await?;
 
-//     println!("Status: {}", response.status());
-
-//     let response_body = response.text().await?;
-//     println!("Response body:\n{}", response_body);
-
-//     //let xxx: GPTResponse = serde_json::from_str(&response_body);
-
-//     let parse_result: Result<GPTResponse, _> = serde_json::from_str(&response_body);
-//     match parse_result {
-//         Ok(parsed_data) => {
-//              println!("Parsed data: {:#?}", parsed_data);
-//             println!("MESSAGE: {:#?}", parsed_data.choices[0].message);
-//         },
-//         Err(error) => {
-//              println!("Error parsing JSON: {:#?}", error);
-//          },
-//      }
-
-//     Ok(())
+//     match response.status() {
+//         StatusCode::OK => {
+//             let response_body = response.text().await?;
+//             let parse_result: Result<GPTResponse, _> = serde_json::from_str(&response_body);
+//             match parse_result {
+//                 Ok(parsed_data) => {
+//                     Ok(parsed_data)
+//                 },
+//                 Err(error) => {
+//                     let error_response = GPTResponse {
+//                         choices: vec![Choice {
+//                             index: 0,
+//                             message: Message {
+//                                 role: "system".to_string(),
+//                                 content: error.to_string(),
+//                             },
+//                             finish_reason: "error".to_string(),
+//                         }],
+//                         ..Default::default()
+//                     };
+//                     Ok(error_response)
+//                 },
+//             }
+//         }
+//         _ => {
+//             let error_response = GPTResponse {
+//                 choices: vec![Choice {
+//                     index: 0,
+//                     message: Message {
+//                         role: "system".to_string(),
+//                         content: response.text().await?,
+//                     },
+//                     finish_reason: "error".to_string(),
+//                 }],
+//                 ..Default::default()
+//             };
+            
+//             Ok(error_response)
+//         }
+//     }
 // }
 
+async fn send_request(request: &GPTRequest, ywt_api_key: &str) -> Result<reqwest::Response, reqwest::Error> {
+    let client = reqwest::Client::new();
+    client
+        .post(OPENAI_MODEL_URL)
+        .header(CONTENT_TYPE, "application/json")
+        .header(AUTHORIZATION, format!("Bearer {}", ywt_api_key.trim()))
+        .json(request)
+        .send()
+        .await
+}
+
+fn create_response_parse_error(error: &serde_json::Error) -> GPTResponse {
+    GPTResponse {
+        choices: vec![Choice {
+            index: 0,
+            message: Message {
+                role: "system".to_string(),
+                content: error.to_string(),
+            },
+            finish_reason: "error".to_string(),
+        }],
+        ..Default::default()
+    }
+}
+
+fn create_response_reqwest_error(error: &String) -> GPTResponse {
+    GPTResponse {
+        choices: vec![Choice {
+            index: 0,
+            message: Message {
+                role: "system".to_string(),
+                content: error.to_string(),
+            },
+            finish_reason: "error".to_string(),
+        }],
+        ..Default::default()
+    }
+}
+
+async fn parse_response(response: reqwest::Response) -> Result<GPTResponse, reqwest::Error> {
+    match response.status() {
+        StatusCode::OK => {
+            let response_body = response.text().await?;
+            let parse_result: Result<GPTResponse, _> = serde_json::from_str(&response_body);
+            match parse_result {
+                Ok(parsed_data) => {
+                    Ok(parsed_data)
+                },
+                Err(error) => {
+                    Ok(create_response_parse_error(&error))
+                },
+            }
+        }
+        _ => {
+            Ok(create_response_reqwest_error(&response.text().await?))
+        }
+    }
+}
+
+async fn send_message(request: &GPTRequest, ywt_api_key: &str) -> Result<GPTResponse, reqwest::Error> {
+    let response = send_request(request, ywt_api_key).await?;
+    let parsed_data = parse_response(response).await?;
+    Ok(parsed_data)
+}
