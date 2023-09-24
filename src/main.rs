@@ -1,3 +1,5 @@
+//https://strawberryperl.com/ need to compile for windows
+
 use std::env;
 use std::io;
 use serde::{Deserialize, Serialize};
@@ -11,9 +13,11 @@ const MAX_MESSAGE_BUFFER: usize = 10;
 const OPENAI_MODEL: &'static str = "gpt-3.5-turbo";
 const OPENAI_MODEL_URL: &'static str = "https://api.openai.com/v1/chat/completions";
 const OPENAI_TEMPERATURE: f32 = 0.8;
-const OPENAI_MAXTOKENS: i32 = 2048; 
+const OPENAI_MAXTOKENS: i32 = 2048;
+const CONSOLE_RED_COLOR: &'static str = "\u{1b}[31m";
 const CONSOLE_GREEN_COLOR: &'static str = "\u{1b}[32m";
 const CONSOLE_BLUE_COLOR: &'static str = "\u{1b}[34m";
+const CONSOLE_PURPLE_COLOR: &'static str = "\u{1b}[35m";
 const CONSOLE_RESET_COLOR: &'static str = "\u{1b}[39m";
 const CONSOLE_BOLD_STYLE: &'static str = "\u{1b}[1m";
 const CONSOLE_RESET_BOLD: &'static str = "\u{1b}[22m";
@@ -123,11 +127,11 @@ async fn main() -> Result<(), Error> {
     let language = set_language();
     let mut ai_chat = set_openai_chat(&language);
 
-    println!("Please start the conversation: ");
+    println!("Please start the conversation.");
     
     loop {
         println!("{0}{1}You: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
-        let message: String = format!("I would like you to split each of your replies into two part. In the first part called as 'Correction:', correct and describe any mistakes in my {0} language. In the second part called as 'Conversation:', feel free to respond to my statement and continue the conversation. \n '{1}'", language,  get_user_input());
+        let message: String = format!("I would like you to split each of your replies into two part. In the first part called as '{0}Correction:{1}', correct and describe any mistakes in my {4} language. In the second part called as '{2}Conversation:{3}', feel free to respond to my statement and continue the conversation. \n '{5}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
         ai_chat.add_message(Message{role: "user".to_string(), content: message});
     
         println!("\n");
