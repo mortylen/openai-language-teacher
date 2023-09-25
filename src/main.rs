@@ -17,6 +17,7 @@ const OPENAI_MAXTOKENS: i32 = 2048;
 const CONSOLE_RED_COLOR: &'static str = "\u{1b}[31m";
 const CONSOLE_GREEN_COLOR: &'static str = "\u{1b}[32m";
 const CONSOLE_BLUE_COLOR: &'static str = "\u{1b}[34m";
+const CONSOLE_BROWN_COLOR: &'static str = "\u{1b}[93m";
 const CONSOLE_PURPLE_COLOR: &'static str = "\u{1b}[35m";
 const CONSOLE_RESET_COLOR: &'static str = "\u{1b}[39m";
 const CONSOLE_BOLD_STYLE: &'static str = "\u{1b}[1m";
@@ -131,7 +132,9 @@ async fn main() -> Result<(), Error> {
     
     loop {
         println!("{0}{1}You: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
-        let message: String = format!("I would like you to split each of your replies into two part. In the first part called as '{0}Correction:{1}', correct and describe any mistakes in my {4} language. In the second part called as '{2}Conversation:{3}', feel free to respond to my statement and continue the conversation. \n '{5}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
+        //let message: String = format!("I would like you to split each of your replies into two part. In the first part called as '{0}Correction:{1}', correct and describe any mistakes in my {4} language. In the second part called as '{2}Conversation:{3}', feel free to respond to my statement and continue the conversation. \n '{5}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
+        //let message: String = format!("I would like you to split each of your replies into two part. In the first part called as '{0}Correction:{1}', description where I made mistakes in my {4} language, next write the correct version of my sentence. In the second part called as '{2}Conversation:{3}', feel free to respond to my statement and continue the conversation. \n '{5}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
+        let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation. \n '{7}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
         ai_chat.add_message(Message{role: "user".to_string(), content: message});
     
         println!("\n");
