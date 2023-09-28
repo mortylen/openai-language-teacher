@@ -1,5 +1,3 @@
-//https://strawberryperl.com/ need to compile for windows
-
 use std::env;
 use std::io;
 use serde::{Deserialize, Serialize};
@@ -8,18 +6,18 @@ use serde::{Deserialize, Serialize};
 use reqwest::header::{CONTENT_TYPE, AUTHORIZATION};
 use reqwest::{Error, StatusCode};
 
-const MAX_MESSAGE_BUFFER: usize = 10;
+const MAX_MESSAGE_BUFFER: usize = 11;
 //const OPENAI_MODEL: &'static str = "gpt-4";
 const OPENAI_MODEL: &'static str = "gpt-3.5-turbo";
 const OPENAI_MODEL_URL: &'static str = "https://api.openai.com/v1/chat/completions";
 const OPENAI_TEMPERATURE: f32 = 0.8;
-const OPENAI_MAXTOKENS: i32 = 2048;
+const OPENAI_MAXTOKENS: i32 = 1024; //2048; //4096;
 const CONSOLE_RED_COLOR: &'static str = "\u{1b}[31m";
 const CONSOLE_GREEN_COLOR: &'static str = "\u{1b}[32m";
 const CONSOLE_BLUE_COLOR: &'static str = "\u{1b}[34m";
 const CONSOLE_BROWN_COLOR: &'static str = "\u{1b}[93m";
 const CONSOLE_PURPLE_COLOR: &'static str = "\u{1b}[35m";
-const CONSOLE_RESET_COLOR: &'static str = "\u{1b}[39m";
+const CONSOLE_RESET_COLOR: &'static str = "\u{1b}[0m"; //"\u{1b}[39m";
 const CONSOLE_BOLD_STYLE: &'static str = "\u{1b}[1m";
 const CONSOLE_RESET_BOLD: &'static str = "\u{1b}[22m";
 
@@ -86,9 +84,29 @@ impl GPTRequest {
     
     fn add_message(&mut self, msg: Message) {
         if self.messages.len() >= MAX_MESSAGE_BUFFER {
-            self.messages.remove(1);
+            //self.messages.remove(1);
+            //self.messages.remove(0);
+            self.messages.drain(0..2);
         }
         self.messages.push(msg);
+    }
+
+    fn add_system_message(&mut self, language: &String) {
+        let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &language);
+        self.messages.push(Message{role: "system".to_string(), content: message});
+    }
+
+    fn remove_system_message(&mut self) {
+        if self.messages.len() >= 1 {
+            //let msg_index = self.messages.iter().position(|i| i.role == "system").unwrap();
+            match self.messages.iter().position(|i| i.role == "system") {
+                Some(msg_index) => {
+                    self.messages.remove(msg_index);
+                },
+                None => {},
+            }
+            //self.messages.remove(msg_index);
+        }
     }
 }
 
@@ -131,12 +149,15 @@ async fn main() -> Result<(), Error> {
     println!("Please start the conversation.");
     
     loop {
+        //TODO: remove_system_message();
+        ai_chat.remove_system_message();
+        ai_chat.add_system_message(&language);
         println!("{0}{1}You: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
-        //let message: String = format!("I would like you to split each of your replies into two part. In the first part called as '{0}Correction:{1}', correct and describe any mistakes in my {4} language. In the second part called as '{2}Conversation:{3}', feel free to respond to my statement and continue the conversation. \n '{5}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
-        //let message: String = format!("I would like you to split each of your replies into two part. In the first part called as '{0}Correction:{1}', description where I made mistakes in my {4} language, next write the correct version of my sentence. In the second part called as '{2}Conversation:{3}', feel free to respond to my statement and continue the conversation. \n '{5}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
-        let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation. \n '{7}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
-        ai_chat.add_message(Message{role: "user".to_string(), content: message});
-    
+        //let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation. \n '{7}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
+        //ai_chat.add_message(Message{role: "user".to_string(), content: message});
+        ai_chat.add_message(Message{role: "user".to_string(), content: get_user_input()});
+        //TODO: add_system_message();
+        //ai_chat.add_system_message(&language);
         println!("\n");
         
         match send_message(&ai_chat, &ywt_api_key).await {
@@ -148,13 +169,14 @@ async fn main() -> Result<(), Error> {
                 
                 ai_chat.add_message(message_content);
                 println!("{0}{1}Lector:{2}{3}\n{4}", CONSOLE_GREEN_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR, response.choices[0].message.content);
+                println!("{:#?}", response.usage);
             }
             Err(error) => {
                 eprintln!("Error sending message: {:?}", error);
             }
         }
         println!("\n");
-        //println!("{:#?}", ai_chat);
+        println!("{:#?}", ai_chat);
     }
 }
 
@@ -169,21 +191,7 @@ async fn send_request(request: &GPTRequest, ywt_api_key: &str) -> Result<reqwest
         .await
 }
 
-fn create_response_parse_error(error: &serde_json::Error) -> GPTResponse {
-    GPTResponse {
-        choices: vec![Choice {
-            index: 0,
-            message: Message {
-                role: "system".to_string(),
-                content: error.to_string(),
-            },
-            finish_reason: "error".to_string(),
-        }],
-        ..Default::default()
-    }
-}
-
-fn create_response_reqwest_error(error: &String) -> GPTResponse {
+fn create_response_error<T>(error: T) -> GPTResponse where T: std::fmt::Display, {
     GPTResponse {
         choices: vec![Choice {
             index: 0,
@@ -207,12 +215,12 @@ async fn parse_response(response: reqwest::Response) -> Result<GPTResponse, reqw
                     Ok(parsed_data)
                 },
                 Err(error) => {
-                    Ok(create_response_parse_error(&error))
+                    Ok(create_response_error(&error))
                 },
             }
         }
         _ => {
-            Ok(create_response_reqwest_error(&response.text().await?))
+            Ok(create_response_error(&response.text().await?))
         }
     }
 }
