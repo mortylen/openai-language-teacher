@@ -91,9 +91,16 @@ impl GPTRequest {
         self.messages.push(msg);
     }
 
-    fn add_system_message(&mut self, language: &String) {
-        let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &language);
-        self.messages.push(Message{role: "system".to_string(), content: message});
+    // fn add_system_message(&mut self, target_language: &String, native_language: &String) {
+    //     let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence in {6} language. In second pard called as '{2}Note{3}', description of where I made grammatical mistakes in my {6} language, this part you write in {7} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation in {6} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language);
+    //     //let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &language);
+    //     self.messages.push(Message{role: "system".to_string(), content: message});
+    // }
+
+    fn add_system_message(&mut self, system_message: &String) {
+        //let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence in {6} language. In second pard called as '{2}Note{3}', description of where I made grammatical mistakes in my {6} language, this part you write in {7} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation in {6} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language);
+        //let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &language);
+        self.messages.push(Message{role: "system".to_string(), content: system_message.to_string()});
     }
 
     fn remove_system_message(&mut self) {
@@ -122,8 +129,13 @@ fn wait_for_api_ywt() -> String {
     api_ywt
 }
 
-fn set_language() -> String {
+fn set_target_language() -> String {
     println!("Please type the language you want to learn (for example 'English'): ");
+    get_user_input()
+}
+
+fn set_native_language() -> String {
+    println!("Please type your native language. (for example 'Germany'): ");
     get_user_input()
 }
 
@@ -143,21 +155,30 @@ fn set_openai_chat(language: &String) -> GPTRequest {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let ywt_api_key = wait_for_api_ywt();
-    let language = set_language();
-    let mut ai_chat = set_openai_chat(&language);
+    let target_language = set_target_language();
+    let native_language = set_native_language();
+    let ai_chat = set_openai_chat(&target_language);
 
+    println!("Choose your education model: \n1 - Conversation \n2 - Learning words \n3 - Exercises \nEnter the number of model:");
+    match get_user_input().trim() {
+        "1" => model_conversation(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
+        "2" => model_words(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
+        "3" => model_exercises(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
+        _ => model_conversation(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
+    }
+
+    Ok(())
+}
+
+async fn model_conversation(ywt_api_key: &String, mut ai_chat: GPTRequest, target_language: &String, native_language: &String) -> Result<(), Error> {
+	let system_message: String = format!("I would like you to split each of your replies into three part. \nIn the first part called as '{0}Correction:{1}', write the correct version of my sentence in {6} language. \nIn second pard called as '{2}Note{3}', description and explain of where I made grammatical mistakes in my {6} language, this part you write in {7} language. \nIn the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation in {6} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language);
     println!("Please start the conversation.");
     
     loop {
-        //TODO: remove_system_message();
         ai_chat.remove_system_message();
-        ai_chat.add_system_message(&language);
+		ai_chat.add_system_message(&system_message);
         println!("{0}{1}You: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
-        //let message: String = format!("I would like you to split each of your replies into three part. In the first part called as '{0}Correction:{1}', write the correct version of my sentence {6} language. In second pard called as '{2}Note{3}', description where I made mistakes in my {6} language. In the third part called as '{4}Conversation:{5}', feel free to respond to my statement and continue the conversation. \n '{7}'", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, CONSOLE_PURPLE_COLOR, CONSOLE_RESET_COLOR, language,  get_user_input());
-        //ai_chat.add_message(Message{role: "user".to_string(), content: message});
         ai_chat.add_message(Message{role: "user".to_string(), content: get_user_input()});
-        //TODO: add_system_message();
-        //ai_chat.add_system_message(&language);
         println!("\n");
         
         match send_message(&ai_chat, &ywt_api_key).await {
@@ -176,7 +197,88 @@ async fn main() -> Result<(), Error> {
             }
         }
         println!("\n");
-        println!("{:#?}", ai_chat);
+    }
+}
+
+async fn model_words(ywt_api_key: &String, mut ai_chat: GPTRequest, target_language: &String, native_language: &String) -> Result<(), Error> {
+	//let system_message: String = format!("You will my {4} language lector. I would like you to split each of your replies into two part. \nIn the first part called as '{0}Correction:{1}', correctand and explain my mistakes in words based on the previous answer (if exist). Explain my mistakes in {5} language and correct words in {4} language. \nIn second pard called as '{2}Translate the words:{3}', generate 10 {5} words in {5} language (format: {5} word, {5} word, {5} word...) and I will translate them in my answer to {4} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language);
+    let system_message1: String = format!("Generate 10 random words only in {1} language, you don't translate them. I will try to translate them into {0} language in my next answer.", &target_language, &native_language);
+    let system_message2: String = format!("You will my {4} language lector. I would like you to split each of your replies into two part. \nIn the first part called as '{0}Correction:{1}', you will correct and explain my mistakes in my translate words from the previous sentence (example: {5} word - {4} word). And use those words in simple sentences. \nIn second pard called as '{2}Translate the words:{3}', generate 10 random words in {5} language and I will try to translate them into {4} language in my next answer.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language);
+	let mut first_loop = true;
+    loop {
+        ai_chat.remove_system_message();
+		//ai_chat.add_system_message(&system_message);
+		
+		if first_loop {
+			first_loop = false;
+            ai_chat.add_system_message(&system_message1);
+			ai_chat.add_message(Message{role: "user".to_string(), content: "Please start generate the words.".to_string()});
+		}
+		else {
+			println!("{0}{1}Translate the words: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR);
+            ai_chat.add_system_message(&system_message2);
+			ai_chat.add_message(Message{role: "user".to_string(), content: get_user_input()});
+		}
+
+        println!("\n");
+        
+        match send_message(&ai_chat, &ywt_api_key).await {
+            Ok(response) => {
+                let message_content = Message {
+                    role: response.choices[0].message.role.clone(),
+                    content: response.choices[0].message.content.clone(),
+                };
+                
+                ai_chat.add_message(message_content);
+                println!("{0}{1}Lector:{2}{3}\n{4}", CONSOLE_GREEN_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR, response.choices[0].message.content);
+                println!("{:#?}", response.usage);
+            }
+            Err(error) => {
+                eprintln!("Error sending message: {:?}", error);
+            }
+        }
+        println!("\n");
+    }
+}
+
+async fn model_exercises(ywt_api_key: &String, mut ai_chat: GPTRequest, target_language: &String, native_language: &String) -> Result<(), Error> {
+	println!("{0}{1}Set your language level (A1, A2, B1, B2, C1, C2): {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
+	let level_language: String = get_user_input();
+	let system_message: String = format!("You will my {4} language lector. You will generate exercises in difficulty {6}, you will correct and evaluate my answer. I would like you to split each of your replies into two part. \nIn the first part called as '{0}Correction:{1}', evaluate and correct my answer in {5} language. \nIn second pard called as '{2}Exercise:{3}', generate random exercises in difficulty {6} in {4} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language, &level_language);
+    //println!("Please start the conversation.");
+    
+	let mut first_loop = true;
+    loop {
+        ai_chat.remove_system_message();
+		ai_chat.add_system_message(&system_message);
+		
+		if first_loop {
+			first_loop = false;
+			ai_chat.add_message(Message{role: "user".to_string(), content: "Please start generate the exercises.".to_string()});
+		}
+		else {
+			println!("{0}{1}Elaborate the exercise: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
+			ai_chat.add_message(Message{role: "user".to_string(), content: get_user_input()});
+		}
+
+        println!("\n");
+        
+        match send_message(&ai_chat, &ywt_api_key).await {
+            Ok(response) => {
+                let message_content = Message {
+                    role: response.choices[0].message.role.clone(),
+                    content: response.choices[0].message.content.clone(),
+                };
+                
+                ai_chat.add_message(message_content);
+                println!("{0}{1}Lector:{2}{3}\n{4}", CONSOLE_GREEN_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR, response.choices[0].message.content);
+                println!("{:#?}", response.usage);
+            }
+            Err(error) => {
+                eprintln!("Error sending message: {:?}", error);
+            }
+        }
+        println!("\n");
     }
 }
 
