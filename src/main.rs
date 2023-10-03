@@ -244,20 +244,30 @@ async fn model_words(ywt_api_key: &String, mut ai_chat: GPTRequest, target_langu
 async fn model_exercises(ywt_api_key: &String, mut ai_chat: GPTRequest, target_language: &String, native_language: &String) -> Result<(), Error> {
 	println!("{0}{1}Set your language level (A1, A2, B1, B2, C1, C2): {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
 	let level_language: String = get_user_input();
-	let system_message: String = format!("You will my {4} language lector. You will generate exercises in difficulty {6}, you will correct and evaluate my answer. I would like you to split each of your replies into two part. \nIn the first part called as '{0}Correction:{1}', evaluate and correct my answer in {5} language. \nIn second pard called as '{2}Exercise:{3}', generate random exercises in difficulty {6} in {4} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language, &level_language);
+    // let system_message1: String = format!("You will my {0} language lector. Generate one random exercise in difficulty {1} in {0} language. I will try to work it out in my next answer.", &target_language, &level_language);
+    // let system_message2: String = format!("You will my {0} language lector. I would like you to split each of your replies into two part. \nIn the first part called as 'Corection:',  evaluate and correct my answer. Write the correct answer in {0} language, but explain my mistakes in {1} language. \nIn second pard called as 'Exercise:', Generate one random exercise in difficulty {2} in {0} language. I will try to work it out in my next answer.", &target_language, &native_language, &level_language);
+	//let system_message1: String = format!("You will my {0} language lector. Generate one random exercise in difficulty {2} in {0} language. This exercise must be in format: Exercise Instructions - this must be written in bilingual, {0} and {1} language. The Exercise - shall not be written in bilingual. Do not disclose the answers from the exercise in the assignment. I will try to work it out in my next answer.", &target_language, &native_language, &level_language);
+    //let system_message2: String = format!("You will my {0} language lector. Comunicate with me in {1} language. I would like you to split each of your replies into two part. \nIn the first part called as 'Correction:',  evaluate and correct my answer. Write the correct answer in {0} language, but explain my mistakes in {1} language. \nIn second pard called as 'Exercise:', Generate one random exercise in difficulty {2} in {0} language. And translate your exercise instruction to {1} language. I will try to work it out in my next answer.", &target_language, &native_language, &level_language);
+	//let system_message: String = format!("You will my {4} language lector. You will generate exercises in difficulty {6}, you will correct and evaluate my answer. I would like you to split each of your replies into two part. \nIn the first part called as '{0}Correction:{1}', evaluate and correct my answer in {5} language. \nIn second pard called as '{2}Exercise:{3}', generate random exercises in difficulty {6} in {4} language.", CONSOLE_RED_COLOR, CONSOLE_RESET_COLOR, CONSOLE_BROWN_COLOR, CONSOLE_RESET_COLOR, &target_language, &native_language, &level_language);
+    let system_message1: String = format!("You are my {0} language lector. Comunicate with me in {1} language. Your job is to teach me {0} language. Generate one random exercise for learning {0} language in difficulty {2}. I will try to work it out in my next answer.", &target_language, &native_language, &level_language);
+    let system_message2: String = format!("You are my {0} language lector. Comunicate with me in {1} language. Your job is to teach me {0} language. I would like you to split each of your replies into two part. \nIn the first part called as 'Correction:',  evaluate my answers to the previous exercise. \nIn second pard called as 'Exercise:', Generate one random exercise for learning {0} in difficulty {2}. I will try to work it out in my next answer.", &target_language, &native_language, &level_language);
+    
     //println!("Please start the conversation.");
     
 	let mut first_loop = true;
     loop {
         ai_chat.remove_system_message();
-		ai_chat.add_system_message(&system_message);
+		//ai_chat.add_system_message(&system_message);
 		
 		if first_loop {
 			first_loop = false;
-			ai_chat.add_message(Message{role: "user".to_string(), content: "Please start generate the exercises.".to_string()});
+            ai_chat.add_system_message(&system_message1);
+            ai_chat.add_message(Message{role: "user".to_string(), content: "".to_string()});
+			//ai_chat.add_message(Message{role: "user".to_string(), content: "Please start generate the exercises.".to_string()});
 		}
 		else {
 			println!("{0}{1}Elaborate the exercise: {2}{3}", CONSOLE_BLUE_COLOR, CONSOLE_BOLD_STYLE, CONSOLE_RESET_BOLD, CONSOLE_RESET_COLOR); 
+            ai_chat.add_system_message(&system_message2);
 			ai_chat.add_message(Message{role: "user".to_string(), content: get_user_input()});
 		}
 
@@ -279,6 +289,8 @@ async fn model_exercises(ywt_api_key: &String, mut ai_chat: GPTRequest, target_l
             }
         }
         println!("\n");
+
+        //println!("{:#?}", ai_chat);
     }
 }
 
