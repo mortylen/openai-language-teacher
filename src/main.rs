@@ -5,7 +5,7 @@ use reqwest::{Error};
 mod openai_executor;
 mod model_conversation;
 mod model_words;
-mod model_exercises;
+//mod model_exercises;
 
 //const OPENAI_MODEL: &'static str = "gpt-4";
 const OPENAI_MODEL: &'static str = "gpt-3.5-turbo";
@@ -50,11 +50,11 @@ async fn main() -> Result<(), Error> {
     let ai_chat = set_openai_chat();
 
     println!("\n");
-    println!("Choose your education model: \n1 - Conversation \n2 - Learning words \n3 - Exercises \nEnter the number of model:");
+    println!("Choose your education model: \n1 - Conversation \n2 - Learning words \n\nEnter the number of model:");
     match openai_executor::get_user_input().trim() {
         "1" => model_conversation::model_conversation(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
         "2" => model_words::model_words(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
-        "3" => model_exercises::model_exercises(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
+        //"3" => model_exercises::model_exercises(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
         _ =>model_conversation::model_conversation(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
     }
 
