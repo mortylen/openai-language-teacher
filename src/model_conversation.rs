@@ -13,7 +13,8 @@ pub async fn model_conversation(ywt_api_key: &String, mut ai_chat: GPTRequest, t
     let mut user_message: String;
     loop {
         ai_chat.remove_system_message();
-		ai_chat.add_system_message(&system_message);
+		//ai_chat.add_system_message(&system_message);
+        ai_chat.add_message(Message{role: "system".to_string(), content: system_message.clone()});
         println!("You: "); 
         user_message = format!("Fix my {0}. Correct my mistakes in this paragraph to standard {0} and write the explanation in {1}. \n'{2}'", &target_language, &native_language, get_user_input());
         ai_chat.add_message(Message{role: "user".to_string(), content: user_message});

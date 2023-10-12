@@ -21,13 +21,15 @@ pub async fn model_exercises(ywt_api_key: &String, mut ai_chat: GPTRequest, targ
 		
 		if first_loop {
 			first_loop = false;
-            ai_chat.add_system_message(&system_message1);
+            //ai_chat.add_system_message(&system_message1);
+            ai_chat.add_message(Message{role: "system".to_string(), content: system_message1});
             ai_chat.add_message(Message{role: "user".to_string(), content: "".to_string()});
 			//ai_chat.add_message(Message{role: "user".to_string(), content: "Please start generate the exercises.".to_string()});
 		}
 		else {
 			println!("Elaborate the exercise: "); 
-            ai_chat.add_system_message(&system_message2);
+            //ai_chat.add_system_message(&system_message2);
+            ai_chat.add_message(Message{role: "system".to_string(), content: system_message2});
 			ai_chat.add_message(Message{role: "user".to_string(), content: get_user_input()});
 		}
 

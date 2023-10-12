@@ -74,9 +74,10 @@ impl GPTRequest {
         self.messages.push(msg);
     }
 
-    pub fn add_system_message(&mut self, system_message: &String) {
-        self.messages.push(Message{role: "system".to_string(), content: system_message.to_string()});
-    }
+    //TODO: remove and use add_message
+    // pub fn add_system_message(&mut self, system_message: &String) {
+    //     self.messages.push(Message{role: "system".to_string(), content: system_message.to_string()});
+    // }
 
     pub fn remove_system_message(&mut self) {
         if self.messages.len() >= 1 {

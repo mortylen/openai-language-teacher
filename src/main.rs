@@ -18,7 +18,7 @@ fn wait_for_api_ywt() -> String {
         args[1].to_string()
     } else {
         println!("\n");
-        println!("Please enter your OpenAI API key (do not share your API key with others, or expose it in the browser or other client-side code): ");
+        println!("Please enter your OpenAI API key (do not share your API key with others): ");
         openai_executor::get_user_input()
     };
 
