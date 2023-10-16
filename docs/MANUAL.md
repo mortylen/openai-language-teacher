@@ -8,7 +8,7 @@ Download the latest Release, extract it to your local computer and run it.
 - Then enter your native language.
 - And finally, choose a language learning model.
 
-Now you just proceed according to the chosen medel.
+Now you just proceed according to the chosen model.
 - For the Conversation model, you just start a conversation with your tutor.
 - For the Learning words model, you will translate the words that your tutor generates for you.
 
