@@ -2,7 +2,7 @@
 
 # OpenAI Language Lector
 
-## Master languages with Rust - OpenAI: Corrects, explains, and enhances your conversations. Learn a language with conversation.
+## Corrects, explains, and enhances your conversations. Learn a language with conversation.
 
 **[PROJECT ARTICLE](https://mortylen.hashnode.dev/openai-language-lector)**
 **|**
