@@ -10,12 +10,6 @@
 **|**
 **[DONATE](https://mortylen.hashnode.dev/contact)**
 
-* [Title](#OpenAI-Language-Lector)
-* [Project Layout](#Project-Layout)
-* [Introduction](#Introduction)
-* [How to run it?](#How-to-run-it)
-* [License](#License)
-
 ## Project Layout
 ```
 joule-heat/
