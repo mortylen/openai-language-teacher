@@ -1,3 +1,4 @@
+![application](https://github.com/mortylen/openai-language-teacher/blob/main/img/teacher_02.png?raw=true)
 
 # OpenAI Language Lector
 
