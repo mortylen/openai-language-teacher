@@ -40,7 +40,7 @@ I am not a native English speaker, but I am eager to improve my language skills.
 ## How to run it?
 Download the latest Release, extract it to your local computer and run it.
 
-### Requirements 
+### Requirements for compile
 To compile the source code on your system, you must have Rust installed to run the application. See [Install Rust](https://rust-lang.org/tools/install) 
 
 ### Manual
