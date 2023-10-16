@@ -13,23 +13,19 @@ pub async fn model_words(ywt_api_key: &String, mut ai_chat: GPTRequest, target_l
     println!("\n");
     
     loop {
-        ai_chat.remove_system_message();        
+        ai_chat.remove_system_message();   
+        ai_chat.add_message(Message{role: "system".to_string(), content: system_message.clone()});
 		if first_loop {
 			first_loop = false;
-            //ai_chat.add_system_message(&system_message);
-            ai_chat.add_message(Message{role: "system".to_string(), content: system_message.clone()});
             user_message = format!("Please generate 10 random words only in {0} language, you don't translate them. And write nothing more.", &native_language);
-			ai_chat.add_message(Message{role: "user".to_string(), content: user_message});
 		}
 		else {
 			println!("Translate the words: ");
-            //ai_chat.add_system_message(&system_message);
-            ai_chat.add_message(Message{role: "system".to_string(), content: system_message.clone()});
             user_message = format!("Please correct my translate from {1} language to {0} language. Write where I made a mistake, write it in {1} language. Use those words in simple sentences in {0} language.\n This is {1} words:{3} \nThis is my translation:\n{2}", &target_language, &native_language, get_user_input(), &openai_words);
-			ai_chat.add_message(Message{role: "user".to_string(), content: user_message});
             first_loop = true;
             println!("\n");
 		}
+        ai_chat.add_message(Message{role: "user".to_string(), content: user_message});
         
         match send_message(&ai_chat, &ywt_api_key).await {
             Ok(response) => {

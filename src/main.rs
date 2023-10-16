@@ -1,16 +1,15 @@
 use std::env;
-//use std::io;
 use reqwest::{Error};
 
 mod openai_executor;
 mod model_conversation;
 mod model_words;
-//mod model_exercises;
+//ADD NEW LEARNING MODEL HERE
 
 //const OPENAI_MODEL: &'static str = "gpt-4";
 const OPENAI_MODEL: &'static str = "gpt-3.5-turbo";
 const OPENAI_TEMPERATURE: f32 = 0.8;
-const OPENAI_MAXTOKENS: i32 = 1024; //2048; //4096;
+const OPENAI_MAXTOKENS: i32 = 1024;
 
 fn wait_for_api_ywt() -> String {
     let args: Vec<String> = env::args().collect();
@@ -27,13 +26,13 @@ fn wait_for_api_ywt() -> String {
 
 fn set_target_language() -> String {
     println!("\n");
-    println!("Please type the language you want to learn (for example 'English'): ");
+    println!("Please specify the language you want to learn (e.g., 'English'): ");
     openai_executor::get_user_input()
 }
 
 fn set_native_language() -> String {
     println!("\n");
-    println!("Please type your native language. (for example 'Germany'): ");
+    println!("Please indicate your native language (e.g., 'German'): ");
     openai_executor::get_user_input()
 }
 
@@ -51,10 +50,10 @@ async fn main() -> Result<(), Error> {
 
     println!("\n");
     println!("Choose your education model: \n1 - Conversation \n2 - Learning words \n\nEnter the number of model:");
+    //ADD NEW CHOOSE OF LEARNING MODEL HERE
     match openai_executor::get_user_input().trim() {
         "1" => model_conversation::model_conversation(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
         "2" => model_words::model_words(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
-        //"3" => model_exercises::model_exercises(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
         _ =>model_conversation::model_conversation(&ywt_api_key, ai_chat, &target_language, &native_language).await?,
     }
 
