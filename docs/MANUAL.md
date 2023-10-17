@@ -3,6 +3,8 @@
 ## How to run it?
 Download the latest Release, extract it to your local computer and run it.
 
+*To use the application it is necessary to have an account on OpenAI and to have a generated API Key.*
+
 - First the application asks for your OpenAI API key. You can see your API keys in your OpanAI account in the 'View API Keys' tab. You can find more information about OpenAI accounts, APIs, and pricing on their official website at [OpenAI](https://openai.com/).
 - Next, enter the language you want to learn.
 - Then enter your native language.
