@@ -35,6 +35,7 @@ I am not a native English speaker, but I am eager to improve my language skills.
 ## How to run it?
 Download the latest Release, extract it to your local computer and run it.
 Enter your OpenAI API key, enter the language you want to learn, enter your native language, choose your learning model and have fun.
+
 *To use the application it is necessary to have an account on OpenAI and to have a generated API Key.*
 
 ### Requirements for compile
