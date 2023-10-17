@@ -41,6 +41,8 @@ Enter your OpenAI API key, enter the language you want to learn, enter your nati
 ### Requirements for compile
 To compile the source code on your system, you must have Rust installed to run the application. See [Install Rust](https://rust-lang.org/tools/install) 
 
+*Remove the `openssl` dependency from `Cargo.toml` if you will compile the code under windows.*
+
 ### Manual
 For detailed instructions see the file ***[MANUAL.md](https://github.com/mortylen/openai-language-teacher/blob/main/docs/MANUAL.md)*** or ***MANUAL.txt*** in the ***docs*** folder for the latest release version.
 
