@@ -4,13 +4,19 @@
 Download the latest Release, extract it to your local computer and run it.
 
 *Windows:*
+
 `openai-language-teacher.exe`
 
 *Linux:*
+
 `openai-language`
+
 *or:*
+
 `./openai-language-teacher`
+
 *or, if you don't have permission:*
+
 `sudo chmod +x ./openai-language-teacher`
 
 *To use the application it is necessary to have an account on OpenAI and to have a generated API Key.*
