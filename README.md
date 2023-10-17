@@ -46,5 +46,8 @@ To compile the source code on your system, you must have Rust installed to run t
 ### Manual
 For detailed instructions see the file ***[MANUAL.md](https://github.com/mortylen/openai-language-teacher/blob/main/docs/MANUAL.md)*** or ***MANUAL.txt*** in the ***docs*** folder for the latest release version.
 
+## Conclusion
+Nonetheless, in the future, if I can allocate enough free time, I intend to transform this project into a web application. I am eager to revisit Rust and create a straightforward web application using web frameworks like Rocket or Actix.
+
 ## License
 This project is licensed under the [Apache License 2.0](https://github.com/mortylen/openai-language-teacher/blob/main/LICENSE) license.
