@@ -33,5 +33,7 @@ Now you just proceed according to the chosen model.
 ### Requirements for compile
 To compile the source code on your system, you must have Rust installed to run the application. See [Install Rust](https://rust-lang.org/tools/install) 
 
+*Remove the `openssl` dependency from `Cargo.toml` if you will compile the code under windows.*
+
 ## License
 This project is licensed under the [Apache License 2.0](https://github.com/mortylen/openai-language-teacher/blob/main/LICENSE) license.
