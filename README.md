@@ -8,7 +8,7 @@
 **|**
 **[LICENSE](https://github.com/mortylen/openai-language-teacher/blob/main/LICENSE)**
 **|**
-**[DONATE](https://mortylen.hashnode.dev/contact)**
+**[SUPPORT MY WORK](https://buymeacoffee.com/mortylen)**
 
 ## Project Layout
 ```
@@ -48,6 +48,14 @@ For detailed instructions see the file ***[MANUAL.md](https://github.com/mortyle
 
 ## Conclusion
 Nonetheless, in the future, if I can allocate enough free time, I intend to transform this project into a web application. I am eager to revisit Rust and create a straightforward web application using web frameworks like Rocket or Actix.
+
+---
+
+If you found this useful, consider supporting me:
+
+☕ [Buy Me a Coffee](https://buymeacoffee.com/mortylen)
+
+---
 
 ## License
 This project is licensed under the [Apache License 2.0](https://github.com/mortylen/openai-language-teacher/blob/main/LICENSE) license.
